@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Mock Listener",
+  "description": "Mock Listener",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_icon": "images/icon.png"
+  },
+  "content_scripts": [
+    {
+      "js": ["scripts/content.js"],
+      "matches": [
+        "https://rp.mockplus.cn/*",
+        "https://developer.chrome.com/docs/extensions/*",
+        "https://developer.chrome.com/docs/webstore/*"
+      ]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["webRequest"],
+  "host_permissions": ["https://rp.mockplus.cn/*"]
+}
