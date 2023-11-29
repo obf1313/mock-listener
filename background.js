@@ -40,10 +40,20 @@ chrome.webRequest.onResponseStarted.addListener(
           return new Response(stream, { headers: { 'Content-Type': 'text/html' } }).text()
         })
         .then(result => {
+          
           const jsonObj = JSON.parse(result)
-          // jsonObj.payload
-          // TODO: 存储 JSON，等待下一次 JSON 对比
-          // TODO: 对比 JSON，将对应 id 在页面上高亮显示
+          const nodeID = jsonObj?.payload?.[0]?.nodeID || ''
+          if (nodeID) {
+            chrome.storage.local.get([nodeID]).then((result) => {
+              // TODO: 对比 JSON，将对应 id 在页面上高亮显示
+              if (result) {
+                
+              } else {
+                // 没有则存储 payload
+                chrome.storage.local.set({ [nodeID]: jsonObj.payload });
+              }
+            })
+          }
         })
     }
   },

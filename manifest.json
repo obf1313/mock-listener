@@ -20,6 +20,6 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["webRequest"],
+  "permissions": ["webRequest", "storage"],
   "host_permissions": ["https://rp.mockplus.cn/*"]
 }
