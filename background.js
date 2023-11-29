@@ -1,3 +1,5 @@
+import { diff as diffJSON } from 'json-diff'
+
 let getOverList = []
 chrome.runtime.onInstalled.addListener(() => {
   chrome.action.setBadgeText({
@@ -47,10 +49,12 @@ chrome.webRequest.onResponseStarted.addListener(
             chrome.storage.local.get([nodeID]).then((result) => {
               // TODO: 对比 JSON，将对应 id 在页面上高亮显示
               if (result) {
-                
+                // TODO: 不知道是对象还是字符串
+                const diff = diffJSON(result, JSON.stringify(jsonObj?.payload))
+                console.log('diff', diff)
               } else {
                 // 没有则存储 payload
-                chrome.storage.local.set({ [nodeID]: jsonObj.payload });
+                chrome.storage.local.set({ [nodeID]: JSON.stringify(jsonObj.payload) })
               }
             })
           }
