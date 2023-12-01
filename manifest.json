@@ -11,15 +11,16 @@
     {
       "js": ["scripts/content.js"],
       "matches": [
-        "https://rp.mockplus.cn/*",
-        "https://developer.chrome.com/docs/extensions/*",
-        "https://developer.chrome.com/docs/webstore/*"
+        "https://rp.mockplus.cn/*"
       ]
     }
   ],
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["webRequest", "storage"],
-  "host_permissions": ["https://rp.mockplus.cn/*"]
+  "permissions": ["webRequest", "storage", "nativeMessaging"],
+  "host_permissions": ["https://rp.mockplus.cn/*"],
+  "externally_connectable": {
+    "matches": ["https://rp.mockplus.cn/*"]
+  }
 }

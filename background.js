@@ -2,9 +2,13 @@ const diffJSON = (before, now) => {
   if (before.updatedAt === now.updatedAt) {
     console.log('无变更')
   } else {
+    const diffArr = []
     // 判断删除和变更
-    diffAndMark(before.components, now.components)
-    // 新增是不是要反着找？
+    diffAndMark(before.components, now.components, diffArr)
+    // TODO: 新增是不是要反着找？
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, diffArr)
+    })
   }
 }
 
@@ -19,33 +23,17 @@ const findNowElement = (nowArr, id) => {
   }
 }
 
-const markElement = id => {
-  const el = document.getElementById(id)
-  if (el) {
-    const newEl = document.createElement('div')
-    el.style.position = 'relative'
-    newEl.style.position = 'absoulte'
-    newEl.style.top = 0
-    newEl.style.left = 0
-    newEl.style.width = el.getBoundingClientRect().width
-    newEl.style.height = el.getBoundingClientRect().height
-    newEl.style.backgroundColor = 'rgba(0, 255, 255, 0.5)'
-    newEl.style.border = '1px solid rgb(255, 255, 0)'
-    el.appendChild(newEl)
-  }
-}
-
-const diffAndMark = (beforeArr, nowArr) => {
+const diffAndMark = (beforeArr, nowArr, diffArr) => {
   for (let i = 0; i < beforeArr.length; i++) {
     const beforeElement = beforeArr[i]
     if (Array.isArray(beforeElement.components)) {
-      diffAndMark(nowElement.components, nowArr)
+      diffAndMark(nowElement.components, nowArr, diffArr)
     } else {
       const nowElement = findNowElement(nowArr, beforeElement._id)
       if (nowElement) {
         // 对比两个元素是否有差异，如果有则高亮该元素
         if (JSON.stringify(beforeElement) !== JSON.stringify(nowElement)) {
-          // markElement(beforeElement._id)
+          diffArr.push(beforeElement._id)
         }
       } else {
         console.log('有元素被删除了')
