@@ -16,8 +16,12 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["webRequest", "storage", "nativeMessaging"],
-  "optional_permissions": ["unlimitedStorage"],
+  "permissions": [
+    "webRequest",
+    "storage",
+    "nativeMessaging",
+    "unlimitedStorage"
+  ],
   "host_permissions": ["https://rp.mockplus.cn/*"],
   "externally_connectable": {
     "matches": ["https://rp.mockplus.cn/*"]
