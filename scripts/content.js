@@ -2,12 +2,12 @@
 const markElement = (id, type = 'update') => {
   const setting = {
     update: {
-      backgroundColor: 'rgba(0, 255, 0, 0.5)',
-      border: '1px solid rgb(0, 255, 0)',
-    },
-    new: {
       backgroundColor: 'rgba(255, 0, 0, 0.5)',
       border: '1px solid rgb(255, 0, 0)',
+    },
+    new: {
+      backgroundColor: 'rgba(0, 255, 0, 0.5)',
+      border: '1px solid rgb(0, 255, 0)',
     },
   }
   const el = document.getElementById(id)
@@ -31,6 +31,9 @@ const markElement = (id, type = 'update') => {
 const showDeleteElement = () => {}
 
 chrome.runtime.onMessage.addListener(function ({ diffArr, deleteArr, newArr }) {
+  console.log('diffArr', diffArr)
+  console.log('newArr', newArr)
+  console.log('deleteArr', deleteArr)
   if (Array.isArray(diffArr)) {
     diffArr.forEach(item => markElement(item))
   }
@@ -38,6 +41,6 @@ chrome.runtime.onMessage.addListener(function ({ diffArr, deleteArr, newArr }) {
     deleteArr.forEach(item => showDeleteElement(item))
   }
   if (Array.isArray(newArr)) {
-    newArr.forEach(item => markElement(item))
+    newArr.forEach(item => markElement(item, 'new'))
   }
 })

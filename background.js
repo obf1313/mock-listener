@@ -9,10 +9,19 @@ const diffJSON = (before, now) => {
     // 判断删除和变更
     diff(before.components, now.components, diffArr, deleteArr)
     // 判断新增
-    diff(before.components, now.components, [], newArr)
+    // diff(before.components, now.components, [], newArr)
     /** 因为 background.js 只能做服务端操作，不能进行 dom 操作，所以需要通过 postMessage 形式通知 content */
+
+    console.log('diffArr', diffArr)
+    console.log('newArr', newArr)
+    console.log('deleteArr', deleteArr)
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      chrome.tabs.sendMessage(tabs[0].id, { diffArr, deleteArr, newArr })
+      // TODO: 不知道为什么有时候拿不到
+      if (Array.isArray(tabs) && tabs.length > 0) {
+        chrome.tabs.sendMessage(tabs[0].id, { diffArr, deleteArr, newArr })
+      } else {
+        console.log('未知错误', tabs)
+      }
     })
   }
 }
@@ -22,6 +31,7 @@ const findNowElement = (nowArr, id) => {
   for (let i = 0; i < nowArr.length; i++) {
     const nowElement = nowArr[i]
     if (nowElement._id === id) {
+      console.log('nowElement', nowElement)
       return nowElement
     } else if (Array.isArray(nowElement.components)) {
       return findNowElement(nowElement.components, id)
@@ -34,7 +44,8 @@ const diff = (beforeArr, nowArr, diffArr, deleteArr) => {
   for (let i = 0; i < beforeArr.length; i++) {
     const beforeElement = beforeArr[i]
     if (Array.isArray(beforeElement.components)) {
-      diff(nowElement.components, nowArr, diffArr, deleteArr)
+      console.log('beforeElement.components', beforeElement.components)
+      diff(beforeElement.components, nowArr, diffArr, deleteArr)
     } else {
       const nowElement = findNowElement(nowArr, beforeElement._id)
       if (nowElement) {
