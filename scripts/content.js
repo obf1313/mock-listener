@@ -20,6 +20,7 @@ const markElement = (id, type = 'update') => {
     newEl.style.height = '100%'
     newEl.style.backgroundColor = setting[type].backgroundColor
     newEl.style.border = setting[type].border
+    newEl.classList.add('plugin-remove')
     newEl.onclick = () => {
       newEl.remove()
     }
@@ -30,10 +31,12 @@ const markElement = (id, type = 'update') => {
 /** 之前被删除的元素怎么处理呢 */
 const showDeleteElement = () => {}
 
-chrome.runtime.onMessage.addListener(function ({ diffArr, deleteArr, newArr }) {
-  console.log('diffArr', diffArr)
-  console.log('newArr', newArr)
-  console.log('deleteArr', deleteArr)
+chrome.runtime.onMessage.addListener(function ({
+  diffArr,
+  deleteArr,
+  newArr,
+  nodeId,
+}) {
   if (Array.isArray(diffArr)) {
     diffArr.forEach(item => markElement(item))
   }
@@ -43,4 +46,30 @@ chrome.runtime.onMessage.addListener(function ({ diffArr, deleteArr, newArr }) {
   if (Array.isArray(newArr)) {
     newArr.forEach(item => markElement(item, 'new'))
   }
+  renderClearButton(nodeId)
 })
+
+/** 清楚当前页面缓存节点 */
+const renderClearButton = nodeId => {
+  const el = document.createElement('button')
+  el.style.position = 'fixed'
+  el.style.top = '20px'
+  el.style.right = '20px'
+  el.style.padding = '10px 20px'
+  el.style.backgroundColor = '#046626'
+  el.style.border = '1px solid #ffffff'
+  el.style.borderRadius = '6px'
+  el.style.color = '#fff'
+  el.style.fontSize = '18px'
+  el.style.cursor = 'pointer'
+  el.innerText = '已完成本次变更'
+  el.onclick = () => {
+    chrome.storage.local.remove([nodeId])
+    // 清除所有标记节点
+    const domList = document.querySelectorAll('.plugin-remove')
+    for (let i = 0; i < domList.length; i++) {
+      domList[i].remove()
+    }
+  }
+  document.body.appendChild(el)
+}
