@@ -1,3 +1,5 @@
+let appIdVar = ''
+
 /** 二次确认框 */
 function alert(parent, message, cb) {
   const ele = document.createElement('div')
@@ -37,6 +39,7 @@ function clearAllCache(e) {
 /** 清除当前项目缓存 */
 function clearProjectCache(e) {
   alert(e.target, '确认清除当前项目缓存吗？', () => {
+    console.log('appIdVar', appIdVar)
     // TODO: 如何获取当前项目 id
     console.log('删除')
   })
@@ -52,3 +55,10 @@ allDom.onclick = function (e) {
 projectDom.onclick = function (e) {
   clearProjectCache(e)
 }
+
+// chrome.runtime.onMessage.addListener(function ({ type, params: { appId } }) {
+//   if (type === 'to-popup') {
+//     console.log('appId', appId)
+//     appIdVar = appId
+//   }
+// })

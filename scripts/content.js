@@ -61,20 +61,19 @@ const renderClearButton = (nodeId, json) => {
 }
 
 chrome.runtime.onMessage.addListener(function ({
-  diffArr,
-  deleteArr,
-  newArr,
-  nodeId,
-  json,
+  type,
+  params: { diffArr, deleteArr, newArr, nodeId, json },
 }) {
-  if (Array.isArray(diffArr)) {
-    diffArr.forEach(item => markElement(item))
+  if (type === 'to-content') {
+    if (Array.isArray(diffArr)) {
+      diffArr.forEach(item => markElement(item))
+    }
+    if (Array.isArray(deleteArr)) {
+      deleteArr.forEach(item => showDeleteElement(item))
+    }
+    if (Array.isArray(newArr)) {
+      newArr.forEach(item => markElement(item, 'new'))
+    }
+    renderClearButton(nodeId, json)
   }
-  if (Array.isArray(deleteArr)) {
-    deleteArr.forEach(item => showDeleteElement(item))
-  }
-  if (Array.isArray(newArr)) {
-    newArr.forEach(item => markElement(item, 'new'))
-  }
-  renderClearButton(nodeId, json)
 })
