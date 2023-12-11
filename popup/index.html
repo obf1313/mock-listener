@@ -4,8 +4,52 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <style>
+      body {
+        padding-bottom: 10px;
+      }
+      button {
+        position: relative;
+        width: 200px;
+        margin-bottom: 10px;
+        padding: 8px 15px;
+        background-color: #046626;
+        border: 1px solid #ffffff;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .button-last {
+        margin-bottom: 0;
+      }
+      .pop-title {
+        color: #000;
+      }
+      .pop-modal {
+        z-index: 1;
+        position: absolute;
+        top: 40px;
+        left: 0;
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #046626;
+        border-radius: 8px;
+      }
+      .row {
+        display: flex;
+        margin-top: 10px;
+      }
+      .little-button {
+        width: 80px;
+        padding: 4px 6px;
+        margin-bottom: 0;
+      }
+    </style>
   </head>
   <body>
-    <button>清除全部缓存</button>
+    <button id="project">（慎重）清除当前项目缓存</button>
+    <button id="all" class="button-last">（慎重）清除全部缓存</button>
+    <script src="./popup.js"></script>
   </body>
 </html>

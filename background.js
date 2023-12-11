@@ -1,7 +1,5 @@
-let nodeId = ''
-
 /** 对比之前数据和本次数据变更 */
-const diffJSON = (before, now, json) => {
+const diffJSON = (before, now, id, json) => {
   if (before.updatedAt === now.updatedAt) {
     console.log('无变更')
   } else {
@@ -21,7 +19,7 @@ const diffJSON = (before, now, json) => {
             diffArr,
             deleteArr,
             newArr,
-            nodeId,
+            nodeId: id,
             json,
           })
         } else {
@@ -70,16 +68,17 @@ const diff = (beforeArr, nowArr, diffArr, deleteArr) => {
 
 let getOverSet = new Set()
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.action.setBadgeText({
-    text: 'ON',
-  })
-})
+// chrome.runtime.onInstalled.addListener(() => {
+//   chrome.action.setBadgeText({
+//     text: 'ON',
+//   })
+// })
 
 // 监听请求
 chrome.webRequest.onResponseStarted.addListener(
   details => {
     // TODO: 此处切换 Tab 就不会执行了，因为不会请求
+    // chrome.storage.local.set('(hlmrmWW19)VZECxoO5N', data['VZECxoO5N'])
     // 因为会进入循环
     if (!getOverSet.has(details.url)) {
       getOverSet.add(details.url)
@@ -89,9 +88,12 @@ chrome.webRequest.onResponseStarted.addListener(
       })
         .then(response => response.json())
         .then(data => {
+          // 项目ID，对应 mock 中一个项目
+          const appID = data?.payload?.[0]?.appID || ''
           const nodeID = data?.payload?.[0]?.nodeID || ''
+          const id = `(${appID})${nodeID}`
           if (nodeID) {
-            chrome.storage.local.get([nodeID]).then(result => {
+            chrome.storage.local.get([id]).then(result => {
               if (
                 (result.constructor === Object &&
                   Object.keys(result).length === 0) ||
@@ -99,14 +101,13 @@ chrome.webRequest.onResponseStarted.addListener(
               ) {
                 // 设置浏览器存储该数据
                 chrome.storage.local.set({
-                  [nodeID]: JSON.stringify(data.payload[0]),
+                  [id]: JSON.stringify(data.payload[0]),
                 })
               } else {
                 // 如果之前存过该页面的数据
-                const before = JSON.parse(result[nodeID])
+                const before = JSON.parse(result[id])
                 const now = data.payload[0]
-                nodeId = nodeID
-                diffJSON(before, now, JSON.stringify(now))
+                diffJSON(before, now, id, JSON.stringify(now))
               }
               getOverSet.delete(details.url)
             })
