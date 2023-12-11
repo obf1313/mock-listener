@@ -1,7 +1,7 @@
 let nodeId = ''
 
 /** 对比之前数据和本次数据变更 */
-const diffJSON = (before, now) => {
+const diffJSON = (before, now, json) => {
   if (before.updatedAt === now.updatedAt) {
     console.log('无变更')
   } else {
@@ -13,14 +13,22 @@ const diffJSON = (before, now) => {
     // 判断新增
     diff(now.components, before.components, [], newArr)
     /** 因为 background.js 只能做服务端操作，不能进行 dom 操作，所以需要通过 postMessage 形式通知 content */
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      // TODO: 不知道为什么有时候拿不到
-      if (Array.isArray(tabs) && tabs.length > 0) {
-        chrome.tabs.sendMessage(tabs[0].id, { diffArr, deleteArr, newArr, nodeId })
-      } else {
-        console.log('未知错误', tabs)
+    chrome.tabs.query(
+      { active: true, lastFocusedWindow: true },
+      function (tabs) {
+        if (Array.isArray(tabs) && tabs.length > 0) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            diffArr,
+            deleteArr,
+            newArr,
+            nodeId,
+            json,
+          })
+        } else {
+          console.log('未找到激活的 tab', tabs)
+        }
       }
-    })
+    )
   }
 }
 
@@ -60,7 +68,7 @@ const diff = (beforeArr, nowArr, diffArr, deleteArr) => {
   }
 }
 
-let getOverList = []
+let getOverSet = new Set()
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.action.setBadgeText({
@@ -71,10 +79,10 @@ chrome.runtime.onInstalled.addListener(() => {
 // 监听请求
 chrome.webRequest.onResponseStarted.addListener(
   details => {
-    // TODO: 此处切换 Tab 就不会执行了，考虑用定时器的方式替换、或者其他更好的方法？
+    // TODO: 此处切换 Tab 就不会执行了，因为不会请求
     // 因为会进入循环
-    if (!getOverList.includes(details.url)) {
-      getOverList.push(details.url)
+    if (!getOverSet.has(details.url)) {
+      getOverSet.add(details.url)
       // 自己请求一次
       fetch(details.url, {
         method: details.method,
@@ -98,8 +106,9 @@ chrome.webRequest.onResponseStarted.addListener(
                 const before = JSON.parse(result[nodeID])
                 const now = data.payload[0]
                 nodeId = nodeID
-                diffJSON(before, now)
+                diffJSON(before, now, JSON.stringify(now))
               }
+              getOverSet.delete(details.url)
             })
           }
         })

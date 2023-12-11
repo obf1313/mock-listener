@@ -28,29 +28,11 @@ const markElement = (id, type = 'update') => {
   }
 }
 
-/** 之前被删除的元素怎么处理呢 */
+/** TODO: 之前被删除的元素怎么处理呢 */
 const showDeleteElement = () => {}
 
-chrome.runtime.onMessage.addListener(function ({
-  diffArr,
-  deleteArr,
-  newArr,
-  nodeId,
-}) {
-  if (Array.isArray(diffArr)) {
-    diffArr.forEach(item => markElement(item))
-  }
-  if (Array.isArray(deleteArr)) {
-    deleteArr.forEach(item => showDeleteElement(item))
-  }
-  if (Array.isArray(newArr)) {
-    newArr.forEach(item => markElement(item, 'new'))
-  }
-  renderClearButton(nodeId)
-})
-
 /** 清楚当前页面缓存节点 */
-const renderClearButton = nodeId => {
+const renderClearButton = (nodeId, json) => {
   const el = document.createElement('button')
   el.style.position = 'fixed'
   el.style.top = '20px'
@@ -70,6 +52,29 @@ const renderClearButton = nodeId => {
     for (let i = 0; i < domList.length; i++) {
       domList[i].remove()
     }
+    // 将本次请求设置为缓存
+    chrome.storage.local.set({
+      [nodeId]: json,
+    })
   }
   document.body.appendChild(el)
 }
+
+chrome.runtime.onMessage.addListener(function ({
+  diffArr,
+  deleteArr,
+  newArr,
+  nodeId,
+  json,
+}) {
+  if (Array.isArray(diffArr)) {
+    diffArr.forEach(item => markElement(item))
+  }
+  if (Array.isArray(deleteArr)) {
+    deleteArr.forEach(item => showDeleteElement(item))
+  }
+  if (Array.isArray(newArr)) {
+    newArr.forEach(item => markElement(item, 'new'))
+  }
+  renderClearButton(nodeId, json)
+})

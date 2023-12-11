@@ -20,7 +20,8 @@
     "webRequest",
     "storage",
     "nativeMessaging",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "tabs"
   ],
   "host_permissions": ["https://rp.mockplus.cn/*"],
   "externally_connectable": {
