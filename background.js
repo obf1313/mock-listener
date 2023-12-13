@@ -1,5 +1,5 @@
-/** 通信 */
-const sendMessage = (type, params) => {
+/** 跟 content.js 通信 */
+const sendMessageToContent = (type, params) => {
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, function (tabs) {
     if (Array.isArray(tabs) && tabs.length > 0) {
       chrome.tabs.sendMessage(tabs[0].id, {
@@ -12,9 +12,14 @@ const sendMessage = (type, params) => {
   })
 }
 
+/** 跟 popup.js 通信 */
+const sendMessageToPopup = (type, params) => {
+  chrome.runtime.sendMessage({ type, params })
+}
+
 /** 对比之前数据和本次数据变更 */
 const diffJSON = (before, now, id, json, appId) => {
-  sendMessage('to-popup', { appId })
+  sendMessageToPopup('to-popup', appId)
   if (before.updatedAt === now.updatedAt) {
     console.log('无变更')
   } else {
@@ -26,7 +31,13 @@ const diffJSON = (before, now, id, json, appId) => {
     // 判断新增
     diff(now.components, before.components, [], newArr)
     /** 因为 background.js 只能做服务端操作，不能进行 dom 操作，所以需要通过 postMessage 形式通知 content */
-    sendMessage('to-content', { diffArr, deleteArr, newArr, nodeId: id, json })
+    sendMessageToContent('to-content', {
+      diffArr,
+      deleteArr,
+      newArr,
+      nodeId: id,
+      json,
+    })
   }
 }
 

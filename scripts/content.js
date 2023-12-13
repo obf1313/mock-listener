@@ -1,25 +1,14 @@
 /** 标记元素 */
 const markElement = (id, type = 'update') => {
   const setting = {
-    update: {
-      backgroundColor: 'rgba(255, 0, 0, 0.5)',
-      border: '1px solid rgb(255, 0, 0)',
-    },
-    new: {
-      backgroundColor: 'rgba(0, 255, 0, 0.5)',
-      border: '1px solid rgb(0, 255, 0)',
-    },
+    update: 'mark-ele-update',
+    new: 'mark-ele-new',
   }
   const el = document.getElementById(id)
   if (el) {
     const newEl = document.createElement('div')
-    newEl.style.position = 'absolute'
-    newEl.style.top = 0
-    newEl.style.left = 0
-    newEl.style.width = '100%'
-    newEl.style.height = '100%'
-    newEl.style.backgroundColor = setting[type].backgroundColor
-    newEl.style.border = setting[type].border
+    newEl.classList.add('mark-ele')
+    newEl.classList.add(setting[type])
     newEl.classList.add('plugin-remove')
     newEl.onclick = () => {
       newEl.remove()
@@ -34,16 +23,7 @@ const showDeleteElement = () => {}
 /** 清楚当前页面缓存节点 */
 const renderClearButton = (nodeId, json) => {
   const el = document.createElement('button')
-  el.style.position = 'fixed'
-  el.style.top = '20px'
-  el.style.right = '20px'
-  el.style.padding = '10px 20px'
-  el.style.backgroundColor = '#046626'
-  el.style.border = '1px solid #ffffff'
-  el.style.borderRadius = '6px'
-  el.style.color = '#fff'
-  el.style.fontSize = '18px'
-  el.style.cursor = 'pointer'
+  el.classList.add('clear-button')
   el.innerText = '已完成本次变更'
   el.onclick = () => {
     chrome.storage.local.remove([nodeId])
