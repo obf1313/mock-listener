@@ -83,47 +83,59 @@ let getOverSet = new Set()
 //   })
 // })
 
+/** 发送请求并对比 */
+const requestAndCompare = url => {
+  if (!getOverSet.has(url)) {
+    getOverSet.add(url)
+    // 自己请求一次
+    fetch(url, {
+      method: 'GET',
+    })
+      .then(response => response.json())
+      .then(data => {
+        // 项目ID，对应 mock 中一个项目
+        const appID = data?.payload?.[0]?.appID || ''
+        const nodeID = data?.payload?.[0]?.nodeID || ''
+        const id = `(${appID})${nodeID}`
+        if (nodeID) {
+          chrome.storage.local.get([id]).then(result => {
+            if (
+              (result.constructor === Object &&
+                Object.keys(result).length === 0) ||
+              !result
+            ) {
+              // 设置浏览器存储该数据
+              chrome.storage.local.set({
+                [id]: JSON.stringify(data.payload[0]),
+              })
+            } else {
+              // 如果之前存过该页面的数据
+              const before = JSON.parse(result[id])
+              const now = data.payload[0]
+              diffJSON(before, now, id, JSON.stringify(now), appID)
+            }
+            getOverSet.delete(url)
+          })
+        }
+      })
+  }
+}
+
 // 监听请求
 chrome.webRequest.onResponseStarted.addListener(
   details => {
-    // TODO: 此处切换 Tab 就不会执行了，因为不会请求
-    // chrome.storage.local.set('(hlmrmWW19)VZECxoO5N', data['VZECxoO5N'])
-    // 因为会进入循环
-    if (!getOverSet.has(details.url)) {
-      getOverSet.add(details.url)
-      // 自己请求一次
-      fetch(details.url, {
-        method: details.method,
-      })
-        .then(response => response.json())
-        .then(data => {
-          // 项目ID，对应 mock 中一个项目
-          const appID = data?.payload?.[0]?.appID || ''
-          const nodeID = data?.payload?.[0]?.nodeID || ''
-          const id = `(${appID})${nodeID}`
-          if (nodeID) {
-            chrome.storage.local.get([id]).then(result => {
-              if (
-                (result.constructor === Object &&
-                  Object.keys(result).length === 0) ||
-                !result
-              ) {
-                // 设置浏览器存储该数据
-                chrome.storage.local.set({
-                  [id]: JSON.stringify(data.payload[0]),
-                })
-              } else {
-                // 如果之前存过该页面的数据
-                const before = JSON.parse(result[id])
-                const now = data.payload[0]
-                diffJSON(before, now, id, JSON.stringify(now), appID)
-              }
-              getOverSet.delete(details.url)
-            })
-          }
-        })
-    }
+    requestAndCompare(details.url.split('?')[0])
   },
   { urls: ['https://rp.mockplus.cn/api/v1/artboard/preview/all/*'] },
   []
 )
+
+/** 监听 tab url 变化，有可能是不是走请求的 */
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  if (changeInfo.url) {
+    const urlList = changeInfo.url.split('?')[0].split('/')
+    const pageId = urlList[urlList.length - 1]
+    const url = 'https://rp.mockplus.cn/api/v1/artboard/preview/all/' + pageId
+    requestAndCompare(url)
+  }
+})
