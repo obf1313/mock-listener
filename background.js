@@ -12,14 +12,12 @@ const sendMessageToContent = (type, params) => {
   })
 }
 
-/** 跟 popup.js 通信 */
-const sendMessageToPopup = (type, params) => {
-  chrome.runtime.sendMessage({ type, params })
-}
-
 /** 对比之前数据和本次数据变更 */
 const diffJSON = (before, now, id, json, appId) => {
-  sendMessageToPopup('to-popup', appId)
+  /** 设置 appId */
+  chrome.storage.local.set({
+    appId: appId,
+  })
   if (before.updatedAt === now.updatedAt) {
     console.log('无变更')
   } else {

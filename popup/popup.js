@@ -1,5 +1,3 @@
-let appIdVar = ''
-
 /** 二次确认框 */
 function alert(parent, message, cb) {
   const ele = document.createElement('div')
@@ -55,20 +53,23 @@ function clearAllCache(e) {
 /** 清除当前项目缓存 */
 function clearProjectCache(e) {
   alert(e.target, '确认清除当前项目缓存吗？', () => {
-    if (!appIdVar) {
-      message('未查询到当前项目信息')
-      return
-    }
-    const deleteArr = []
-    chrome.storage.local.get().then(data => {
-      for (key in data) {
-        if (key.toString().startsWith(`(${appIdVar})`)) {
-          deleteArr.push(key)
-        }
+    chrome.storage.local.get(['appId'], data => {
+      const appId = data.appId
+      if (!appId) {
+        message('未查询到当前项目信息')
+        return
       }
-      // chrome.storage.local.remove(deleteArr, function () {
-      //   message('删除成功')
-      // })
+      const deleteArr = []
+      chrome.storage.local.get().then(data => {
+        for (key in data) {
+          if (key.toString().startsWith(`(${appId})`)) {
+            deleteArr.push(key)
+          }
+        }
+        chrome.storage.local.remove(deleteArr, function () {
+          message('删除成功')
+        })
+      })
     })
   })
 }
@@ -83,11 +84,3 @@ allDom.onclick = function (e) {
 projectDom.onclick = function (e) {
   clearProjectCache(e)
 }
-
-// TODO: 只有打开控制台才能成功接收（传递）消息，有时候会报错 Uncaught (in promise) Error: Could not establish connection. Receiving end does not exist.
-chrome.runtime.onMessage.addListener(function ({ type, params: { appId } }) {
-  console.log('appIdVar', appIdVar)
-  if (type === 'to-popup') {
-    appIdVar = appId
-  }
-})
